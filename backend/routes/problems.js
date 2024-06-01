@@ -6,9 +6,12 @@ const {
     deleteProblem,
     updateProblem
 } = require('../controllers/problemController')
-
+const requireAuth = require('../middleware/requireauth')
 
 const router = express.Router()
+
+// require auth for problem routes
+router.use(requireAuth)
 
 // GET all problems
 router.get('/', getProblems)

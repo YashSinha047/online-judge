@@ -31,6 +31,24 @@ const getProblem = async (req, res) => {
 const createProblem = async (req,res) => {
     const { title, description, difficulty, testCases } = req.body
 
+    let emptyFields = []
+    
+    if(!title){
+        emptyFields.push('title')
+    }
+    if(!description){
+        emptyFields.push('description')
+    }
+    if(!difficulty){
+        emptyFields.push('difficulty')
+    }
+    if(!testCases){
+        emptyFields.push('testCases')
+    }
+    if(emptyFields.length > 0){
+        return res.status(400).json({error: 'Please fill in all the fields', emptyFields})
+    }
+
     try{
         const problem = await Problem.create({title, description, difficulty, testCases})
         res.status(200).json(problem)
