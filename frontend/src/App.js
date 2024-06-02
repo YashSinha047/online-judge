@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-
+import Solve from './pages/Solve';
 
 
 function App() {
@@ -27,8 +27,12 @@ function App() {
               element={!user ? <Login/> : <Navigate to="/" />}
             />
             <Route
-              path='/Signup'
+              path='/signup'
               element={!user ? <Signup/> : <Navigate to="/" />}
+            />
+            <Route
+              path='/:id'
+              element={!user ? <Login/> : <Solve />}
             />
           </Routes>
         </div>

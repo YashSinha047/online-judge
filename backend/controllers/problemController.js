@@ -1,5 +1,8 @@
 const Problem = require('../models/ProblemModel')
 const mongoose = require('mongoose')
+const { generateFile } = require('../generateFile')
+const { executeCpp } = require('../executeCpp')
+
 
 // get all problems
 const getProblems = async (req, res) => {
@@ -57,6 +60,30 @@ const createProblem = async (req,res) => {
     }
 }
 
+// submit a problem
+const submitProblem = async (req, res) => {
+    const { language = 'cpp', code } = req.body;
+
+    if (!code) {
+        console.error('Empty code!');
+        return res.status(400).json({ success: false, error: "Empty code!" });
+    }
+
+    try {
+        console.log(`Generating file for language: ${language}`);
+        const filePath = await generateFile(language, code);
+        console.log(`File generated at: ${filePath}`);
+        const output = await executeCpp(filePath);
+        console.log(`Execution output: ${output}`);
+        res.status(200).json({ success: true, filePath, output });
+    } catch (error) {
+        console.error('Error during code execution:', error);
+        res.status(500).json({ success: false, error: error.message, details: error });
+    }
+}
+
+
+
 
 // delete a problem
 const deleteProblem = async (req, res) => {
@@ -100,5 +127,6 @@ module.exports = {
     getProblems,
     getProblem,
     updateProblem,
-    deleteProblem
+    deleteProblem,
+    submitProblem
 }

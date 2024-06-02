@@ -4,7 +4,8 @@ const {
     getProblems,
     getProblem,
     deleteProblem,
-    updateProblem
+    updateProblem,
+    submitProblem
 } = require('../controllers/problemController')
 const requireAuth = require('../middleware/requireauth')
 
@@ -21,6 +22,9 @@ router.get('/:id', getProblem)
 
 // CREATE a problem
 router.post('/', createProblem)
+
+// Submit a problem
+router.post('/:id', submitProblem)
 
 // Delete a problem
 router.delete('/:id', deleteProblem)

@@ -1,11 +1,13 @@
 import React from 'react';
 import { useProblemsContext } from '../hooks/useProblemsContext';
 import{ useAuthContext} from "../hooks/useAuthContext";
+import { useNavigate } from 'react-router-dom';
 
 
 const ProblemDetails = ({ problem }) => {
     const { dispatch } = useProblemsContext()
     const { user } = useAuthContext()
+    const navigate = useNavigate();
     
 
     const handleClick = async () => {
@@ -26,6 +28,10 @@ const ProblemDetails = ({ problem }) => {
         }
     }
 
+    const handleSolveClick = () => {
+        navigate(`/${problem._id}`);
+    };
+
     return (
         <div className="problem-details">
             <h2>{problem.title}</h2>
@@ -45,7 +51,7 @@ const ProblemDetails = ({ problem }) => {
                 <p>No test cases available.</p>
             )}
             <button  className='material-symbols-outlined' onClick={handleClick}>delete</button>
-            
+            <button className='material-symbols-outlined' onClick={handleSolveClick}>solve</button>
         </div>
     );
 };
