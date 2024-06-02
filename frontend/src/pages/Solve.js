@@ -8,8 +8,8 @@ const Solve = () => {
     const [problem, setProblem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [code, setCode] = useState('');
-    const [input, setInput] = useState('');
+    const [code, setCode] = useState(localStorage.getItem(`code-${id}`) || '');
+    const [input, setInput] = useState(localStorage.getItem(`input-${id}`) || '');
     const [output, setOutput] = useState('');
     const [language, setLanguage] = useState('cpp'); 
 
@@ -44,12 +44,41 @@ const Solve = () => {
         fetchProblem();
     }, [id, user]);
 
-    const handleRunCode = () => {
-        // Logic to run the code
+    useEffect(() => {
+        localStorage.setItem(`code-${id}`, code);
+    }, [code, id]);
+
+    useEffect(() => {
+        localStorage.setItem(`input-${id}`, input);
+    }, [input, id]);
+
+    const handleRunCode = async () => {
+        setOutput('');
+
+        try {
+            const response = await fetch(`/api/problems/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ language, code, input })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setOutput(data.output);
+            } else {
+                setOutput(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            setOutput(`Error: ${error.message}`);
+        }
     };
 
     const handleSubmitCode = () => {
-        // Logic to submit the code
+        // Logic to submit the code (similar to handleRunCode)
     };
 
     if (loading) {
@@ -121,4 +150,3 @@ const Solve = () => {
 };
 
 export default Solve;
-

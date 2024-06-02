@@ -62,7 +62,7 @@ const createProblem = async (req,res) => {
 
 // submit a problem
 const submitProblem = async (req, res) => {
-    const { language = 'cpp', code } = req.body;
+    const { language = 'cpp', code, input } = req.body;
 
     if (!code) {
         console.error('Empty code!');
@@ -73,7 +73,7 @@ const submitProblem = async (req, res) => {
         console.log(`Generating file for language: ${language}`);
         const filePath = await generateFile(language, code);
         console.log(`File generated at: ${filePath}`);
-        const output = await executeCpp(filePath);
+        const output = await executeCpp(filePath, input);
         console.log(`Execution output: ${output}`);
         res.status(200).json({ success: true, filePath, output });
     } catch (error) {
@@ -81,6 +81,12 @@ const submitProblem = async (req, res) => {
         res.status(500).json({ success: false, error: error.message, details: error });
     }
 }
+
+module.exports = {
+    submitProblem,
+};
+
+
 
 
 

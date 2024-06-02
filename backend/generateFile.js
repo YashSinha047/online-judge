@@ -17,11 +17,9 @@ const generateFile = async (format, content) => {
         await fs.promises.writeFile(filePath, content);
         return filePath;
     } catch (error) {
-        console.error('Error writing file:', error);
         throw new Error('Error writing file');
     }
 };
-
 
 module.exports = {
     generateFile,
