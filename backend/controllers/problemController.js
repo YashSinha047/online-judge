@@ -1,64 +1,97 @@
 const Problem = require('../models/ProblemModel')
 const mongoose = require('mongoose')
-const { generateFile } = require('../generateFile')
-const { executeCpp } = require('../executeCpp')
+const { generateFile } = require('../utils/generateFile');
+const { executeCpp } = require('../utils/executeCpp');
+const { executePython } = require('../utils/executePython');
+const { executeJava } = require('../utils/executeJava');
 
 
 // get all problems
 const getProblems = async (req, res) => {
-    const problems = await Problem.find({}).sort({createdAt: -1})
+    try {
+        // Fetch problems and include only relevant fields (e.g., exclude hiddenTestCases)
+        const problems = await Problem.find({}, 'title description difficulty sampleTestCases').sort({ createdAt: -1 });
+        res.status(200).json(problems);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
-    res.status(200).json(problems)
-}
 
 
 // get a single problem
 const getProblem = async (req, res) => {
-    const {id} = req.params
+    const { id } = req.params;
 
-    if(!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({error: "No such problem"})
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: "No such problem" });
     }
 
-    const problem = await Problem.findById(id)
+    try {
+        // Fetch the problem by ID and include only relevant fields
+        const problem = await Problem.findById(id, 'title description difficulty sampleTestCases hiddenTestCases');
 
-    if(!problem){
-        return res.status(404).json({error: "No such problem"})
+        if (!problem) {
+            return res.status(404).json({ error: "No such problem" });
+        }
+
+        res.status(200).json(problem);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-
-    res.status(200).json(problem)
-}
+};
 
 
 // create a new problem
-const createProblem = async (req,res) => {
-    const { title, description, difficulty, testCases } = req.body
+const createProblem = async (req, res) => {
+    const { title, description, difficulty, sampleTestCases, hiddenTestCases } = req.body;
 
-    let emptyFields = []
-    
-    if(!title){
-        emptyFields.push('title')
+    let emptyFields = [];
+
+    if (!title) {
+        emptyFields.push('title');
     }
-    if(!description){
-        emptyFields.push('description')
+    if (!description) {
+        emptyFields.push('description');
     }
-    if(!difficulty){
-        emptyFields.push('difficulty')
+    if (!difficulty) {
+        emptyFields.push('difficulty');
     }
-    if(!testCases){
-        emptyFields.push('testCases')
+    if (!sampleTestCases || sampleTestCases.length === 0) {
+        emptyFields.push('sampleTestCases');
     }
-    if(emptyFields.length > 0){
-        return res.status(400).json({error: 'Please fill in all the fields', emptyFields})
+    if (!hiddenTestCases || hiddenTestCases.length === 0) {
+        emptyFields.push('hiddenTestCases');
     }
 
-    try{
-        const problem = await Problem.create({title, description, difficulty, testCases})
-        res.status(200).json(problem)
-    } catch (error){
-        res.status(400).json({error: error.message})
+    sampleTestCases.forEach((testCase, index) => {
+        if (!testCase.input) emptyFields.push(`sampleTestCaseInput-${index}`);
+        if (!testCase.output) emptyFields.push(`sampleTestCaseOutput-${index}`);
+    });
+
+    hiddenTestCases.forEach((testCase, index) => {
+        if (!testCase.input) emptyFields.push(`hiddenTestCaseInput-${index}`);
+        if (!testCase.output) emptyFields.push(`hiddenTestCaseOutput-${index}`);
+    });
+
+    if (emptyFields.length > 0) {
+        return res.status(400).json({ error: 'Please fill in all the fields', emptyFields });
     }
-}
+
+    try {
+        const problem = await Problem.create({
+            title,
+            description,
+            difficulty,
+            sampleTestCases,
+            hiddenTestCases
+        });
+        res.status(200).json(problem);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 
 // submit a problem
 const submitProblem = async (req, res) => {
@@ -80,15 +113,7 @@ const submitProblem = async (req, res) => {
         console.error('Error during code execution:', error);
         res.status(500).json({ success: false, error: error.message, details: error });
     }
-}
-
-module.exports = {
-    submitProblem,
 };
-
-
-
-
 
 
 // delete a problem
@@ -128,11 +153,76 @@ const updateProblem = async (req, res) => {
     res.status(202).json(problem)
 }
 
+const evaluateCodeAgainstTestCases = async (code, language, hiddenTestCases) => {
+    try {
+        for (const testCase of hiddenTestCases) {
+            let output;
+            let filePath;
+            switch (language) {
+                case 'cpp':
+                    filePath = await generateFile(language, code);
+                    output = await executeCpp(filePath, testCase.input);
+                    console.log(`Execution output: ${output}`);
+                    break;
+                // Add cases for other languages if needed
+                default:
+                    throw new Error('Unsupported language');
+            }
+
+            console.log(output.trim());
+            console.log(testCase.output.trim());
+            if (output.trim() !== testCase.output.trim()) {
+                return 'rejected';
+            }
+        }
+        return 'accepted';
+    } catch (error) {
+        console.error('Error evaluating code against test cases:', error);
+        throw new Error('Failed to evaluate code against test cases.');
+    }
+};
+
+const submitCode = async (req, res) => {
+    const { language, code } = req.body;
+    const { id } = req.params;
+
+    try {
+        const problem = await Problem.findById(id);
+
+        if (!problem) {
+            return res.status(404).json({ error: 'Problem not found' });
+        }
+
+        const hiddenTestCases = problem.hiddenTestCases;
+        console.log('Hidden Test Cases:', hiddenTestCases); // Log the hidden test cases array
+
+        let status;
+
+        switch (language) {
+            case 'cpp':
+                status = await evaluateCodeAgainstTestCases(code, language, hiddenTestCases);
+                break;
+            // Add cases for other languages if needed
+            default:
+                throw new Error('Unsupported language');
+        }
+
+        return res.json({ status });
+    } catch (error) {
+        console.error('Error evaluating code:', error);
+        return res.status(500).json({ error: 'Failed to evaluate code' });
+    }
+};
+
+
+
+
 module.exports = {
     createProblem,
     getProblems,
     getProblem,
     updateProblem,
     deleteProblem,
-    submitProblem
+    submitProblem,
+    submitCode
 }

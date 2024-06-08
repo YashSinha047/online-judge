@@ -8,16 +8,17 @@ if (!fs.existsSync(outputPath)) {
     fs.mkdirSync(outputPath, { recursive: true });
 }
 
-const executeCpp = (filepath, input) => {
-    const jobId = path.basename(filepath).split(".")[0];
-    const outPath = path.join(outputPath, `${jobId}.exe`);
-    const inputFilePath = path.join(outputPath, `${jobId}.txt`);
+const executePython = (code, input) => {
+    const jobId = Date.now().toString();
+    const codePath = path.join(outputPath, `${jobId}.py`);
+    const inputPath = path.join(outputPath, `${jobId}.txt`);
+
+    fs.writeFileSync(codePath, code);
+    fs.writeFileSync(inputPath, input);
 
     return new Promise((resolve, reject) => {
-        fs.writeFileSync(inputFilePath, input);
-
         exec(
-            `g++ ${filepath} -o ${outPath} && ${outPath} < ${inputFilePath}`,
+            `python3 ${codePath} < ${inputPath}`,
             (error, stdout, stderr) => {
                 if (error) {
                     return reject({ error, stderr });
@@ -32,5 +33,5 @@ const executeCpp = (filepath, input) => {
 };
 
 module.exports = {
-    executeCpp,
+    executePython,
 };

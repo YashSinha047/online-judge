@@ -11,7 +11,8 @@ const Solve = () => {
     const [code, setCode] = useState(localStorage.getItem(`code-${id}`) || '');
     const [input, setInput] = useState(localStorage.getItem(`input-${id}`) || '');
     const [output, setOutput] = useState('');
-    const [language, setLanguage] = useState('cpp'); 
+    const [evaluationResult, setEvaluationResult] = useState('');
+    const [language, setLanguage] = useState('cpp');
 
     useEffect(() => {
         const fetchProblem = async () => {
@@ -54,9 +55,15 @@ const Solve = () => {
 
     const handleRunCode = async () => {
         setOutput('');
+        setEvaluationResult('');
+
+        if (!input) {
+            setOutput('Error: Please provide input.');
+            return;
+        }
 
         try {
-            const response = await fetch(`/api/problems/${id}`, {
+            const response = await fetch(`/api/problems/${id}/run`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,8 +84,29 @@ const Solve = () => {
         }
     };
 
-    const handleSubmitCode = () => {
-        // Logic to submit the code (similar to handleRunCode)
+    const handleSubmitCode = async () => {
+        setEvaluationResult('');
+
+        try {
+            const response = await fetch(`/api/problems/${id}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ language, code })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setEvaluationResult(data.status);
+            } else {
+                setEvaluationResult(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            setEvaluationResult(`Error: ${error.message}`);
+        }
     };
 
     if (loading) {
@@ -126,15 +154,20 @@ const Solve = () => {
                     <button onClick={handleRunCode}>Run Code</button>
                     <button onClick={handleSubmitCode}>Submit Code</button>
                 </div>
+                {evaluationResult && (
+                    <div className={`evaluation-result ${evaluationResult === 'accepted' ? 'accepted' : 'rejected'}`}>
+                        {evaluationResult}
+                    </div>
+                )}
             </div>
             <div className="problem-details-code">
                 <h2>{problem.title}</h2>
                 <p><strong>Description:</strong> {problem.description}</p>
                 <p><strong>Difficulty:</strong> {problem.difficulty}</p>
-                <h3>Test Cases</h3>
-                {problem.testCases && problem.testCases.length > 0 ? (
+                <h3>Sample Test Cases</h3>
+                {problem.sampleTestCases && problem.sampleTestCases.length > 0 ? (
                     <ul>
-                        {problem.testCases.map((testCase, index) => (
+                        {problem.sampleTestCases.map((testCase, index) => (
                             <li key={index}>
                                 <p><strong>Input:</strong> {testCase.input}</p>
                                 <p><strong>Output:</strong> {testCase.output}</p>

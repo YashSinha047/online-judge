@@ -2,42 +2,56 @@ import { useState } from "react";
 import { useProblemsContext } from "../hooks/useProblemsContext";
 import { useAuthContext } from "../hooks/useAuthContext";
 
-
 const ProblemForm = () => {
     const { dispatch } = useProblemsContext();
-    const { user } = useAuthContext()
+    const { user } = useAuthContext();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [difficulty, setDifficulty] = useState('easy');
-    const [testCases, setTestCases] = useState([{ input: '', output: '' }]);
+    const [sampleTestCases, setSampleTestCases] = useState([{ input: '', output: '' }]);
+    const [hiddenTestCases, setHiddenTestCases] = useState([{ input: '', output: '' }]);
     const [error, setError] = useState(null);
     const [emptyFields, setEmptyFields] = useState([]);
 
-    const handleAddTestCase = () => {
-        setTestCases([...testCases, { input: '', output: '' }]);
+    const handleAddSampleTestCase = () => {
+        setSampleTestCases([...sampleTestCases, { input: '', output: '' }]);
     };
 
-    const handleTestCaseChange = (index, type, value) => {
-        const newTestCases = [...testCases];
+    const handleSampleTestCaseChange = (index, type, value) => {
+        const newTestCases = [...sampleTestCases];
         newTestCases[index][type] = value;
-        setTestCases(newTestCases);
+        setSampleTestCases(newTestCases);
+    };
+
+    const handleAddHiddenTestCase = () => {
+        setHiddenTestCases([...hiddenTestCases, { input: '', output: '' }]);
+    };
+
+    const handleHiddenTestCaseChange = (index, type, value) => {
+        const newTestCases = [...hiddenTestCases];
+        newTestCases[index][type] = value;
+        setHiddenTestCases(newTestCases);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if(!user) {
-            setError('You must be logged in')
-            return
+        if (!user) {
+            setError('You must be logged in');
+            return;
         }
 
         const emptyFields = [];
         if (!title) emptyFields.push('title');
         if (!description) emptyFields.push('description');
         if (!difficulty) emptyFields.push('difficulty');
-        testCases.forEach((testCase, index) => {
-            if (!testCase.input) emptyFields.push(`testCaseInput-${index}`);
-            if (!testCase.output) emptyFields.push(`testCaseOutput-${index}`);
+        sampleTestCases.forEach((testCase, index) => {
+            if (!testCase.input) emptyFields.push(`sampleTestCaseInput-${index}`);
+            if (!testCase.output) emptyFields.push(`sampleTestCaseOutput-${index}`);
+        });
+        hiddenTestCases.forEach((testCase, index) => {
+            if (!testCase.input) emptyFields.push(`hiddenTestCaseInput-${index}`);
+            if (!testCase.output) emptyFields.push(`hiddenTestCaseOutput-${index}`);
         });
 
         if (emptyFields.length > 0) {
@@ -46,7 +60,13 @@ const ProblemForm = () => {
             return;
         }
 
-        const problem = { title, description, difficulty, testCases };
+        const problem = {
+            title,
+            description,
+            difficulty,
+            sampleTestCases,
+            hiddenTestCases,
+        };
 
         const response = await fetch('/api/problems', {
             method: 'POST',
@@ -66,10 +86,10 @@ const ProblemForm = () => {
             setTitle('');
             setDescription('');
             setDifficulty('easy');
-            setTestCases([{ input: '', output: '' }]);
+            setSampleTestCases([{ input: '', output: '' }]);
+            setHiddenTestCases([{ input: '', output: '' }]);
             setError(null);
             setEmptyFields([]);
-            console.log('new problem added', json);
             dispatch({ type: 'CREATE_PROBLEM', payload: json });
         }
     };
@@ -106,26 +126,47 @@ const ProblemForm = () => {
                 <option value="hard">Hard</option>
             </select>
 
-            <h4>Test Cases</h4>
-            {testCases.map((testCase, index) => (
+            <h4>Sample Test Cases</h4>
+            {sampleTestCases.map((testCase, index) => (
                 <div key={index} className="test-case">
                     <label>Input:</label>
                     <input
                         type="text"
-                        onChange={(e) => handleTestCaseChange(index, 'input', e.target.value)}
+                        onChange={(e) => handleSampleTestCaseChange(index, 'input', e.target.value)}
                         value={testCase.input}
-                        className={emptyFields.includes(`testCaseInput-${index}`) ? 'error-field' : ''}
+                        className={emptyFields.includes(`sampleTestCaseInput-${index}`) ? 'error-field' : ''}
                     />
                     <label>Output:</label>
                     <input
                         type="text"
-                        onChange={(e) => handleTestCaseChange(index, 'output', e.target.value)}
+                        onChange={(e) => handleSampleTestCaseChange(index, 'output', e.target.value)}
                         value={testCase.output}
-                        className={emptyFields.includes(`testCaseOutput-${index}`) ? 'error-field' : ''}
+                        className={emptyFields.includes(`sampleTestCaseOutput-${index}`) ? 'error-field' : ''}
                     />
                 </div>
             ))}
-            <button type="button" onClick={handleAddTestCase}>Add Test Case</button>
+            <button type="button" onClick={handleAddSampleTestCase}>Add Sample Test Case</button>
+
+            <h4>Hidden Test Cases</h4>
+            {hiddenTestCases.map((testCase, index) => (
+                <div key={index} className="test-case">
+                    <label>Input:</label>
+                    <input
+                        type="text"
+                        onChange={(e) => handleHiddenTestCaseChange(index, 'input', e.target.value)}
+                        value={testCase.input}
+                        className={emptyFields.includes(`hiddenTestCaseInput-${index}`) ? 'error-field' : ''}
+                    />
+                    <label>Output:</label>
+                    <input
+                        type="text"
+                        onChange={(e) => handleHiddenTestCaseChange(index, 'output', e.target.value)}
+                        value={testCase.output}
+                        className={emptyFields.includes(`hiddenTestCaseOutput-${index}`) ? 'error-field' : ''}
+                    />
+                </div>
+            ))}
+            <button type="button" onClick={handleAddHiddenTestCase}>Add Hidden Test Case</button>
 
             <button type="submit">Add Problem</button>
         </form>
@@ -133,3 +174,4 @@ const ProblemForm = () => {
 };
 
 export default ProblemForm;
+

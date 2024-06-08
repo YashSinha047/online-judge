@@ -35,21 +35,21 @@ const ProblemDetails = ({ problem }) => {
     return (
         <div className="problem-details">
             <h2>{problem.title}</h2>
-            <p><strong>Description:</strong> {problem.description}</p>
-            <p><strong>Difficulty:</strong> {problem.difficulty}</p>
-            <h3>Test Cases</h3>
-            {problem.testCases && problem.testCases.length > 0 ? (
-                <ul>
-                    {problem.testCases.map((testCase, index) => (
-                        <li key={index}>
-                            <p><strong>Input:</strong> {testCase.input}</p>
-                            <p><strong>Output:</strong> {testCase.output}</p>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No test cases available.</p>
-            )}
+                <p><strong>Description:</strong> {problem.description}</p>
+                <p><strong>Difficulty:</strong> {problem.difficulty}</p>
+                <h3>Sample Test Cases</h3>
+                {problem.sampleTestCases && problem.sampleTestCases.length > 0 ? (
+                    <ul>
+                        {problem.sampleTestCases.map((testCase, index) => (
+                            <li key={index}>
+                                <p><strong>Input:</strong> {testCase.input}</p>
+                                <p><strong>Output:</strong> {testCase.output}</p>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No test cases available.</p>
+                )}
             <button  className='material-symbols-outlined' onClick={handleClick}>delete</button>
             <button className='material-symbols-outlined' onClick={handleSolveClick}>solve</button>
         </div>
