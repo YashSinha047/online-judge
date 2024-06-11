@@ -11,7 +11,7 @@ if (!fs.existsSync(outputPath)) {
 
 const executeCpp = (filepath, input) => {
     const jobId = path.basename(filepath).split('.')[0];
-    const outPath = path.join(outputPath, `${jobId}.exe`); // Correct file extension for executable
+    const outPath = path.join(outputPath, `${jobId}.out`); // Correct file extension for executable
     const inputFilePath = path.join(outputPath, `${jobId}.txt`); // Correct file extension for input file
 
     return new Promise((resolve, reject) => {

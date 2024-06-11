@@ -3,10 +3,10 @@ import { useProblemsContext } from "../hooks/useProblemsContext";
 import { useAuthContext } from "../hooks/useAuthContext"
 
 // components
-import ProblemDetails from '../components/problemDetails';
+import ProblemDetailsAdmin from '../components/problemDetailsAdmin';
 import ProblemForm from "../components/ProblemForm";
 
-const Home = () => {
+const AdminHome = () => {
 
     const { problems, dispatch } = useProblemsContext()
     const { user } = useAuthContext()
@@ -36,7 +36,7 @@ const Home = () => {
         <div className="home">
             <div className="problems">
             {problems && problems.map((problem) => (
-                <ProblemDetails key={problem._id} problem={problem}/>
+                <ProblemDetailsAdmin key={problem._id} problem={problem}/>
             ))}
             </div>
             <ProblemForm/>
@@ -45,4 +45,4 @@ const Home = () => {
     );
 }
  
-export default Home;
+export default AdminHome;

@@ -8,12 +8,12 @@ const {
     submitProblem,
     submitCode
 } = require('../controllers/problemController')
-const requireAuth = require('../middleware/requireauth')
+const requireauth = require('../middleware/requireauth')
 
 const router = express.Router()
 
 // require auth for problem routes
-router.use(requireAuth)
+router.use(requireauth)
 
 // GET all problems
 router.get('/', getProblems)

@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const { generateFile } = require('../utils/generateFile');
 const { executeCpp } = require('../utils/executeCpp');
 const { executePython } = require('../utils/executePython');
-const { executeJava } = require('../utils/executeJava');
+
 
 
 // get all problems
@@ -106,7 +106,17 @@ const submitProblem = async (req, res) => {
         console.log(`Generating file for language: ${language}`);
         const filePath = await generateFile(language, code);
         console.log(`File generated at: ${filePath}`);
-        const output = await executeCpp(filePath, input);
+        let output;
+        switch (language) {
+            case 'cpp':
+                output = await executeCpp(filePath, input);
+                break;
+            case 'python':
+                output = await executePython(code, input);
+                break;
+            default:
+                throw new Error('Unsupported language');
+        }
         console.log(`Execution output: ${output}`);
         res.status(200).json({ success: true, filePath, output });
     } catch (error) {
@@ -164,6 +174,11 @@ const evaluateCodeAgainstTestCases = async (code, language, hiddenTestCases) => 
                     output = await executeCpp(filePath, testCase.input);
                     console.log(`Execution output: ${output}`);
                     break;
+                case 'python':
+                    filePath = await generateFile(language, code);
+                    output = await executePython(code, testCase.input);
+                    console.log(`Execution output: ${output}`);
+                    break;    
                 // Add cases for other languages if needed
                 default:
                     throw new Error('Unsupported language');
@@ -202,6 +217,9 @@ const submitCode = async (req, res) => {
             case 'cpp':
                 status = await evaluateCodeAgainstTestCases(code, language, hiddenTestCases);
                 break;
+            case 'python':
+                status = await evaluateCodeAgainstTestCases(code, language, hiddenTestCases);
+                break;    
             // Add cases for other languages if needed
             default:
                 throw new Error('Unsupported language');

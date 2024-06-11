@@ -13,6 +13,12 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    role: {
+        type: String,
+        required: true,
+        enum: ['admin', 'user'],
+        default: 'user'
     }
 });
 
@@ -45,9 +51,9 @@ userSchema.statics.signup = async function(email, password){
 }
 
 // static login method
-userSchema.statics.login = async function(email, password) {
+userSchema.statics.login = async function(email, password, role) {
 
-    if(!email || !password){
+    if(!email || !password || !role){
         throw Error('All fields must be filled')
     }
 
@@ -61,6 +67,10 @@ userSchema.statics.login = async function(email, password) {
 
     if (!match) {
         throw Error('Incorrect password')
+    }
+
+    if(role !== user.role){
+        throw Error('You have not signed in for this role')
     }
 
     return user

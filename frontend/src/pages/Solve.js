@@ -127,7 +127,7 @@ const Solve = () => {
                 >
                     <option value="cpp">C++</option>
                     <option value="python">Python</option>
-                    <option value="java">Java</option>
+                    
                 </select>
                 <textarea
                     className="code-area"
@@ -153,12 +153,13 @@ const Solve = () => {
                 <div className="buttons">
                     <button onClick={handleRunCode}>Run Code</button>
                     <button onClick={handleSubmitCode}>Submit Code</button>
-                </div>
-                {evaluationResult && (
+                    {evaluationResult && (
                     <div className={`evaluation-result ${evaluationResult === 'accepted' ? 'accepted' : 'rejected'}`}>
                         {evaluationResult}
                     </div>
-                )}
+                    )}
+                </div>
+                
             </div>
             <div className="problem-details-code">
                 <h2>{problem.title}</h2>

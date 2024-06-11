@@ -95,81 +95,83 @@ const ProblemForm = () => {
     };
 
     return (
-        <form className="problem-form" onSubmit={handleSubmit}>
-            <h3>Add a new problem</h3>
+        <div className="container">
+            <form className="problem-form" onSubmit={handleSubmit}>
+                <h3>Add a new problem</h3>
 
-            {error && <div className="error">{error}</div>}
+                {error && <div className="error">{error}</div>}
 
-            <label>Problem Title:</label>
-            <input
-                type="text"
-                onChange={(e) => setTitle(e.target.value)}
-                value={title}
-                className={emptyFields.includes('title') ? 'error-field' : ''}
-            />
+                <label>Problem Title:</label>
+                <input
+                    type="text"
+                    onChange={(e) => setTitle(e.target.value)}
+                    value={title}
+                    className={emptyFields.includes('title') ? 'error-field' : ''}
+                />
 
-            <label>Problem Description:</label>
-            <textarea
-                onChange={(e) => setDescription(e.target.value)}
-                value={description}
-                className={emptyFields.includes('description') ? 'error-field' : ''}
-            ></textarea>
+                <label>Problem Description:</label>
+                <textarea
+                    onChange={(e) => setDescription(e.target.value)}
+                    value={description}
+                    className={emptyFields.includes('description') ? 'error-field' : ''}
+                ></textarea>
 
-            <label>Difficulty:</label>
-            <select
-                onChange={(e) => setDifficulty(e.target.value)}
-                value={difficulty}
-                className={emptyFields.includes('difficulty') ? 'error-field' : ''}
-            >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
+                <label>Difficulty:</label>
+                <select
+                    onChange={(e) => setDifficulty(e.target.value)}
+                    value={difficulty}
+                    className={emptyFields.includes('difficulty') ? 'error-field' : ''}
+                >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
 
-            <h4>Sample Test Cases</h4>
-            {sampleTestCases.map((testCase, index) => (
-                <div key={index} className="test-case">
-                    <label>Input:</label>
-                    <input
-                        type="text"
-                        onChange={(e) => handleSampleTestCaseChange(index, 'input', e.target.value)}
-                        value={testCase.input}
-                        className={emptyFields.includes(`sampleTestCaseInput-${index}`) ? 'error-field' : ''}
-                    />
-                    <label>Output:</label>
-                    <input
-                        type="text"
-                        onChange={(e) => handleSampleTestCaseChange(index, 'output', e.target.value)}
-                        value={testCase.output}
-                        className={emptyFields.includes(`sampleTestCaseOutput-${index}`) ? 'error-field' : ''}
-                    />
-                </div>
-            ))}
-            <button type="button" onClick={handleAddSampleTestCase}>Add Sample Test Case</button>
+                <h4>Sample Test Cases</h4>
+                {sampleTestCases.map((testCase, index) => (
+                    <div key={index} className="test-case">
+                        <label>Input:</label>
+                        <input
+                            type="text"
+                            onChange={(e) => handleSampleTestCaseChange(index, 'input', e.target.value)}
+                            value={testCase.input}
+                            className={emptyFields.includes(`sampleTestCaseInput-${index}`) ? 'error-field' : ''}
+                        />
+                        <label>Output:</label>
+                        <input
+                            type="text"
+                            onChange={(e) => handleSampleTestCaseChange(index, 'output', e.target.value)}
+                            value={testCase.output}
+                            className={emptyFields.includes(`sampleTestCaseOutput-${index}`) ? 'error-field' : ''}
+                        />
+                    </div>
+                ))}
+                <button type="button" onClick={handleAddSampleTestCase}>Add Sample Test Case</button>
 
-            <h4>Hidden Test Cases</h4>
-            {hiddenTestCases.map((testCase, index) => (
-                <div key={index} className="test-case">
-                    <label>Input:</label>
-                    <input
-                        type="text"
-                        onChange={(e) => handleHiddenTestCaseChange(index, 'input', e.target.value)}
-                        value={testCase.input}
-                        className={emptyFields.includes(`hiddenTestCaseInput-${index}`) ? 'error-field' : ''}
-                    />
-                    <label>Output:</label>
-                    <input
-                        type="text"
-                        onChange={(e) => handleHiddenTestCaseChange(index, 'output', e.target.value)}
-                        value={testCase.output}
-                        className={emptyFields.includes(`hiddenTestCaseOutput-${index}`) ? 'error-field' : ''}
-                    />
-                </div>
-            ))}
-            <button type="button" onClick={handleAddHiddenTestCase}>Add Hidden Test Case</button>
+                <h4>Hidden Test Cases</h4>
+                {hiddenTestCases.map((testCase, index) => (
+                    <div key={index} className="test-case">
+                        <label>Input:</label>
+                        <input
+                            type="text"
+                            onChange={(e) => handleHiddenTestCaseChange(index, 'input', e.target.value)}
+                            value={testCase.input}
+                            className={emptyFields.includes(`hiddenTestCaseInput-${index}`) ? 'error-field' : ''}
+                        />
+                        <label>Output:</label>
+                        <input
+                            type="text"
+                            onChange={(e) => handleHiddenTestCaseChange(index, 'output', e.target.value)}
+                            value={testCase.output}
+                            className={emptyFields.includes(`hiddenTestCaseOutput-${index}`) ? 'error-field' : ''}
+                        />
+                    </div>
+                ))}
+                <button type="button" onClick={handleAddHiddenTestCase}>Add Hidden Test Case</button>
 
-            <button type="submit">Add Problem</button>
-        </form>
+                <button type="submit">Add Problem</button>
+            </form>
+        </div>    
     );
 };
 
