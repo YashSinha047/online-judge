@@ -6,17 +6,21 @@ export const ProblemsContext = createContext();
 export const problemsReducer = (state,action) => {
     switch(action.type){
         case 'SET_PROBLEMS':
-            return{
+            return {
+                ...state, // Make sure to preserve other state properties
                 problems: action.payload
-            }
+            };
         case 'CREATE_PROBLEM':
-            return{
+            return {
+                ...state,
                 problems: [action.payload, ...state.problems]
-            }    
+            };
         case 'DELETE_PROBLEM':
-            return{
-                problems: state.problems.filter((p) => p._id !== action.payload._id)
-            }    
+            // Filter out the problem with the given ID
+            return {
+                ...state,
+                problems: state.problems.filter((p) => p._id !== action.payload)
+            };
         default: 
             return state    
     }

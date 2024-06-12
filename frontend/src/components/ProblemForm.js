@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useProblemsContext } from "../hooks/useProblemsContext";
 import { useAuthContext } from "../hooks/useAuthContext";
+import api from "../api";
 
 const ProblemForm = () => {
     const { dispatch } = useProblemsContext();
@@ -35,12 +36,12 @@ const ProblemForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         if (!user) {
             setError('You must be logged in');
             return;
         }
-
+    
         const emptyFields = [];
         if (!title) emptyFields.push('title');
         if (!description) emptyFields.push('description');
@@ -53,13 +54,13 @@ const ProblemForm = () => {
             if (!testCase.input) emptyFields.push(`hiddenTestCaseInput-${index}`);
             if (!testCase.output) emptyFields.push(`hiddenTestCaseOutput-${index}`);
         });
-
+    
         if (emptyFields.length > 0) {
             setEmptyFields(emptyFields);
             setError('Please fill in all the fields');
             return;
         }
-
+    
         const problem = {
             title,
             description,
@@ -67,32 +68,35 @@ const ProblemForm = () => {
             sampleTestCases,
             hiddenTestCases,
         };
-
-        const response = await fetch('/api/problems', {
-            method: 'POST',
-            body: JSON.stringify(problem),
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${user.token}`
+    
+        try {
+            const response = await api.post('/api/problems', problem, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                }
+            });
+    
+            if (response.status >= 200 && response.status < 300) {
+                setTitle('');
+                setDescription('');
+                setDifficulty('easy');
+                setSampleTestCases([{ input: '', output: '' }]);
+                setHiddenTestCases([{ input: '', output: '' }]);
+                setError(null);
+                setEmptyFields([]);
+                dispatch({ type: 'CREATE_PROBLEM', payload: response.data });
+            } else {
+                const data = response.data;
+                setError(data.error);
+                setEmptyFields(data.emptyFields);
             }
-        });
-
-        const json = await response.json();
-
-        if (!response.ok) {
-            setError(json.error);
-            setEmptyFields(json.emptyFields);
-        } else {
-            setTitle('');
-            setDescription('');
-            setDifficulty('easy');
-            setSampleTestCases([{ input: '', output: '' }]);
-            setHiddenTestCases([{ input: '', output: '' }]);
-            setError(null);
-            setEmptyFields([]);
-            dispatch({ type: 'CREATE_PROBLEM', payload: json });
+        } catch (error) {
+            setError(error.message);
         }
     };
+    
+    
 
     return (
         <div className="container">

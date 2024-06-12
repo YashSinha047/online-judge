@@ -2,6 +2,7 @@ import React from 'react';
 import { useProblemsContext } from '../hooks/useProblemsContext';
 import{ useAuthContext} from "../hooks/useAuthContext";
 import { useNavigate } from 'react-router-dom';
+import api from '../api';
 
 
 const ProblemDetailsAdmin = ({ problem }) => {
@@ -11,22 +12,29 @@ const ProblemDetailsAdmin = ({ problem }) => {
     
 
     const handleClick = async () => {
-        if(!user){
-            return 
-        } 
-        const response = await fetch('/api/problems/' + problem._id, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${user.token}`
-            }
-        })
-
-        const json = await response.json()
-
-        if(response.ok){
-            dispatch({type: 'DELETE_PROBLEM', payload: json})
+        if (!user) {
+            return;
         }
-    }
+    
+        try {
+            const response = await api.delete(`/api/problems/${problem._id}`, {
+                headers: {
+                    'Authorization': `Bearer ${user.token}`
+                }
+            });
+    
+            if (response.status === 200) {
+                dispatch({ type: 'DELETE_PROBLEM', payload: problem._id });
+            } else {
+                // Handle error or display a message
+                console.error('Failed to delete the problem');
+            }
+        } catch (error) {
+            // Handle error or display a message
+            console.error('Failed to delete the problem:', error.message);
+        }
+    };
+    
 
     const handleSolveClick = () => {
         navigate(`/${problem._id}`);

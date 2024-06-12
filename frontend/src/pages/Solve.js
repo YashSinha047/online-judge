@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthContext } from '../hooks/useAuthContext';
+import api from '../api';
 
 const Solve = () => {
     const { id } = useParams();
@@ -21,19 +22,19 @@ const Solve = () => {
                 setLoading(false);
                 return;
             }
-
+    
             try {
-                const response = await fetch(`/api/problems/${id}`, {
+                const response = await api.get(`/api/problems/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${user.token}`
                     }
                 });
-
-                if (!response.ok) {
+    
+                if (response.status !== 200) {
                     throw new Error('Failed to fetch the problem.');
                 }
-
-                const data = await response.json();
+    
+                const data = response.data;
                 setProblem(data);
             } catch (error) {
                 setError(error.message);
@@ -41,7 +42,7 @@ const Solve = () => {
                 setLoading(false);
             }
         };
-
+    
         fetchProblem();
     }, [id, user]);
 
@@ -56,25 +57,27 @@ const Solve = () => {
     const handleRunCode = async () => {
         setOutput('');
         setEvaluationResult('');
-
+    
         if (!input) {
             setOutput('Error: Please provide input.');
             return;
         }
-
+    
         try {
-            const response = await fetch(`/api/problems/${id}/run`, {
-                method: 'POST',
+            const response = await api.post(`/api/problems/${id}/run`, {
+                language,
+                code,
+                input
+            }, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify({ language, code, input })
+                }
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
+    
+            const data = response.data;
+    
+            if (response.status === 200) {
                 setOutput(data.output);
             } else {
                 setOutput(`Error: ${data.error}`);
@@ -86,20 +89,21 @@ const Solve = () => {
 
     const handleSubmitCode = async () => {
         setEvaluationResult('');
-
+    
         try {
-            const response = await fetch(`/api/problems/${id}/submit`, {
-                method: 'POST',
+            const response = await api.post(`/api/problems/${id}/submit`, {
+                language,
+                code
+            }, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify({ language, code })
+                }
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
+    
+            const data = response.data;
+    
+            if (response.status === 200) {
                 setEvaluationResult(data.status);
             } else {
                 setEvaluationResult(`Error: ${data.error}`);
