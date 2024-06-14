@@ -1,8 +1,6 @@
 // src/config.js
-
-
 const config = {
-    apiBaseUrl: 'http://3.110.162.6:4000'
+    apiBaseUrl: process.env.REACT_APP_API_BASE_URL
 };
 
 export default config;
