@@ -1,6 +1,7 @@
 # 🏆 Online Judge Platform
 
 Welcome to the **Online Judge Platform** - your go-to solution for coding challenges and competitive programming! This platform allows developers to practice coding, participate in contests, and improve their programming skills. Built with modern web technologies, our platform is designed for performance, scalability, and ease of use.
+
 ![image](https://github.com/YashSinha047/online-judge/assets/121245329/19a95aec-00da-4340-95fc-7cf6b3ac9d68)
 
 
